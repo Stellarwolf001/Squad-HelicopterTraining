@@ -11,6 +11,7 @@ RCON.C程序为冲锋号四直升机训练服改编的Windows版本
 将file = fopen("C:\\Users\\Administrator\\Desktop\\squad_server\\SquadGame\\Saved\\Logs\\SquadGame.log", "r");更改为服务器LOG文件地址
 
 使用gcc编译器进行编译：
+
 gcc -o rcon rcon.c -lws2_32
 
 gcc -o SkipTime SkipTime.c
