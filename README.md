@@ -1,4 +1,4 @@
-RCON.C程序由冲锋号四直升机训练服改编的Windows版本
+RCON.C程序为冲锋号四直升机训练服改编的Windows版本
 感谢冲锋号四的开源精神
 
 此脚本现安装于Squad自定义服务器红警三服_直升机训练专用服
@@ -12,6 +12,7 @@ RCON.C程序由冲锋号四直升机训练服改编的Windows版本
 
 使用gcc编译器进行编译：
 gcc -o rcon rcon.c -lws2_32
+
 gcc -o SkipTime SkipTime.c
 
 将生成的SkipTime.exe及rcon.exe拷贝到服务器中
