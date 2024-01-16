@@ -7,8 +7,7 @@ RCON.C程序为冲锋号四直升机训练服改编的Windows版本
 使用环境：Windows，gcc
 
 使用方法：
-打开SkipTime.c文件，将rconPath，serverPassword，serverPort分别改为rcon.exe文件的地址，服务器RCON的密码，服务器RCON的端口
-将file = fopen("C:\\Users\\Administrator\\Desktop\\squad_server\\SquadGame\\Saved\\Logs\\SquadGame.log", "r");更改为服务器LOG文件地址
+打开SkipTime.c文件，将rconPath，serverPassword，serverPort，log_address分别改为rcon.exe文件的地址，服务器RCON的密码，服务器RCON的端口，服务器LOG文件地址
 
 使用gcc编译器进行编译：
 
