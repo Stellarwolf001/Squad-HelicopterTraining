@@ -1,16 +1,16 @@
-/*æ­¤ä»£ç ä¸»è¦åŠŸèƒ½ä¸ºï¼š
- *è¯†åˆ«æ—¥å¿—ä¸­æ¢å›¾çš„æ—¶é—´æˆ³ï¼Œ
- *ä¸å®é™…æ—¶é—´åšå¯¹æ¯”ï¼Œ
- *å·®å€¼å°äº15såŠæ‰§è¡ŒåŠ é€ŸåŠå–æ¶ˆé™åˆ¶æŒ‡ä»¤
- *æœ¬äººåˆšåˆšå…¥é—¨ï¼Œä»£ç é£æ ¼è¾ƒä¸ºæµ…æ˜¾ï¼Œå¤§ä½¬å‹¿å–·
+/*´Ë´úÂëÖ÷Òª¹¦ÄÜÎª£º
+ *Ê¶±ğÈÕÖ¾ÖĞ»»Í¼µÄÊ±¼ä´Á£¬
+ *ÓëÊµ¼ÊÊ±¼ä×ö¶Ô±È£¬
+ *²îÖµĞ¡ÓÚ15s¼°Ö´ĞĞ¼ÓËÙ¼°È¡ÏûÏŞÖÆÖ¸Áî
+ *±¾ÈË¸Õ¸ÕÈëÃÅ£¬´úÂë·ç¸ñ½ÏÎªÇ³ÏÔ£¬´óÀĞÎğÅç
  *
- *è¯·å°†ä»¥ä¸‹å†…å®¹è¿›è¡Œä¿®æ”¹
- * 49è¡Œ *rconPath = "C:\\Users\\Administrator\\Desktop\\rcon.exe";
- * 50è¡Œ *serverPassword = "-PYourRCONPassword";
- * 51è¡Œ *serverPort = "-p21114";
- * 75è¡Œ file = fopen("C:\\Users\\Administrator\\Desktop\\squad_server\\SquadGame\\Saved\\Logs\\SquadGame.log", "r");
+ *Çë½«ÒÔÏÂÄÚÈİ½øĞĞĞŞ¸Ä
+ * 23ĞĞ *rconPath = "C:\\Users\\Administrator\\Desktop\\rcon.exe";
+ * 24ĞĞ *serverPassword = "-PYourRCONPassword";
+ * 25ĞĞ *serverPort = "-p21114";
+ * 26ĞĞ *log_address = "C:\\Users\\Administrator\\Desktop\\squad_server\\SquadGame\\Saved\\Logs\\SquadGame.log";
  * 
- * Squadçº¢è­¦_Stellarwolfç¼–å†™
+ * Squadºì¾¯_Stellarwolf±àĞ´
 */
 
 
@@ -19,7 +19,28 @@
 #include <string.h>
 #include <time.h>
 
-// å®šä¹‰ç»“æ„ä½“å­˜å‚¨æ—¥æœŸå’Œæ—¶é—´
+// ×¢ÒâÌæ»»ÏÂÃæµÄÂ·¾¶ÎªÊµ¼ÊµÄ rcon.exe ÎÄ¼şÂ·¾¶
+const char *rconPath = "C:\\Users\\Administrator\\Desktop\\rcon.exe";
+const char *serverPassword = "-PYourRCONPassword";
+const char *serverPort = "-p21114";
+const char *log_address = "C:\\Users\\Administrator\\Desktop\\squad_server\\SquadGame\\Saved\\Logs\\SquadGame.log";
+
+// ¶¨ÒåÃüÁî×Ö·û´®Êı×é
+const char *commands[] = 
+{
+    "AdminSlomo 20",
+    "AdminForceAllVehicleAvailability 1",
+    "AdminForceAllRoleAvailability 1",
+    "AdminForceAllDeployableAvailability 1",
+    "AdminForceAllRoleAvailability 1",
+    "AdminDisableVehicleTeamRequirement 1",
+    "AdminDisableVehicleKitRequirement 1",
+    "AdminDisableVehicleClaiming 1",
+    "AdminNoRespawnTimer 1",
+    "AdminSlomo 1"
+};
+
+// ¶¨Òå½á¹¹Ìå´æ´¢ÈÕÆÚºÍÊ±¼ä
 struct DateTime 
 {
     char year[5];
@@ -29,12 +50,13 @@ struct DateTime
     char minute[3];
     char second[3];
     char millisecond[4];
-};
+}logDateTime;                
 
-// å°†æ—¥å¿—ä¸­çš„æœˆã€æ—¥ã€æ—¶ã€åˆ†ã€ç§’ç»„åˆæˆä¸€ä¸ªæ•´æ•°
-int combineDateTime(struct DateTime logDateTime) 
+//½«ÈÕÖ¾ÖĞµÄÔÂ¡¢ÈÕ¡¢Ê±¡¢·Ö¡¢Ãë×éºÏ³ÉÒ»¸öÕûÊı
+unsigned int LogcombineDateTime_sec(char line[],struct DateTime logDateTime) 
 {
-    int result = 0,mouth,day,hour,minute,second;
+    int result = 0,mouth,day,hour,minute,second;// ÌáÈ¡Äê¡¢ÔÂ¡¢ÈÕ¡¢Ğ¡Ê±¡¢·ÖÖÓ¡¢Ãë
+    sscanf(line, "[%4[^.].%2[^.].%2[^-]-%2[^.].%2[^.].%2[^:]:%2[^.].%2[^.]:%3[^]]", logDateTime.year, logDateTime.month, logDateTime.day, logDateTime.hour, logDateTime.minute, logDateTime.second, logDateTime.millisecond);
     mouth = strtol(logDateTime.month, NULL, 10) * 2592000;
     day = strtol(logDateTime.day, NULL, 10) * 86400;
     hour = strtol(logDateTime.hour, NULL, 10) * 3600;
@@ -45,112 +67,106 @@ int combineDateTime(struct DateTime logDateTime)
     return result;
 }
 
+//½«µ±Ç°Ê±¼äµÄÔÂ¡¢ÈÕ¡¢Ê±¡¢·Ö¡¢Ãë×éºÏ³ÉÒ»¸öÕûÊı
+unsigned int LocalcombineDateTime_sec(struct tm *localTime) 
+{
+    unsigned int result;
+
+    result = (localTime->tm_mon + 1) * 2592000+
+    (localTime->tm_mday) * 86400+
+    (localTime->tm_hour) * 3600+
+    (localTime->tm_min) * 60+
+    (localTime->tm_sec);
+
+    return result;
+}
+
+//Ö´ĞĞÖ¸Áî
+int Skip_Time(struct tm *localTime)
+{
+    //´òÓ¡Ö´ĞĞÖ¸ÁîµÄÊ±¼ä
+    printf("Skip_Time\n");
+    printf("localtime = [%d.%d.%d-%d:%d:%d]\n\n",localTime->tm_year + 1900,localTime->tm_mon + 1,localTime->tm_mday,localTime->tm_hour,localTime->tm_min,localTime->tm_sec);
+
+    //µÈ´ı5Ãë
+    system("timeout /t 5 /nobreak >nul");
+
+    //»ñÈ¡ÃüÁîÊı×éµÄ³¤¶È
+    size_t numCommands = sizeof(commands) / sizeof(commands[0]);
+
+    for (size_t i = 0; i < numCommands; i++) 
+    {
+        //¹¹½¨ÍêÕûµÄÃüÁî×Ö·û´®
+        char fullCommand[512];
+        snprintf(fullCommand, sizeof(fullCommand), "%s %s %s %s", rconPath, serverPort, serverPassword, commands[i]);
+
+        //Ö´ĞĞÖ¸Áî
+        int result = system(fullCommand);
+
+        //¼ì²éÖ´ĞĞ½á¹û
+        if (result != 0) 
+        {
+            fprintf(stderr, "Failed to execute command: %s\n", fullCommand);
+            return 1;
+        }
+
+        //µÈ´ı1Ãë
+        system("timeout /t 1 /nobreak >nul");
+    }
+}
+
 int main() 
 {    
-    // æ³¨æ„æ›¿æ¢ä¸‹é¢çš„è·¯å¾„ä¸ºå®é™…çš„ rcon.exe æ–‡ä»¶è·¯å¾„
-    const char *rconPath = "C:\\Users\\Administrator\\Desktop\\rcon.exe";
-    const char *serverPassword = "-PYourRCONPassword";
-    const char *serverPort = "-p21114";
-
-    // å®šä¹‰å‘½ä»¤å­—ç¬¦ä¸²æ•°ç»„
-    const char *commands[] = 
-    {
-        "AdminSlomo 20",
-        "AdminForceAllVehicleAvailability 1",
-        "AdminForceAllRoleAvailability 1",
-        "AdminForceAllDeployableAvailability 1",
-        "AdminForceAllRoleAvailability 1",
-        "AdminDisableVehicleTeamRequirement 1",
-        "AdminDisableVehicleKitRequirement 1",
-        "AdminDisableVehicleClaiming 1",
-        "AdminNoRespawnTimer 1",
-        "AdminSlomo 1"
-    };
-
-
-
     FILE *file;
     char line[512];
 
+    //»ñÈ¡µ±Ç°Ê±¼äµÄÊ±¼ä´Á
+    time_t currentTime;
+    time(&currentTime);
+
+    //Ê¹ÓÃ localtime º¯Êı½«Ê±¼ä´Á×ª»»Îª±¾µØÊ±¼ä
+    struct tm *localTime = localtime(&currentTime);
+
+    printf("½Å±¾Æô¶¯³É¹¦£¬µ±Ç°Ê±¼äÎª£º\n");
+    printf("localtime = [%d.%d.%d-%d:%d:%d]\n\n",localTime->tm_year + 1900,localTime->tm_mon + 1,localTime->tm_mday,localTime->tm_hour,localTime->tm_min,localTime->tm_sec);
+
     while(1)
     {
-        file = fopen("C:\\Users\\Administrator\\Desktop\\squad_server\\SquadGame\\Saved\\Logs\\SquadGame.log", "r");
+        file = fopen(log_address, "r");
 
         if (file == NULL) 
         {
             perror("Error opening file");
+            fclose(file);
             return 1;
         }
 
-        // åˆ›å»ºç»“æ„ä½“å˜é‡å­˜å‚¨æ—¥æœŸå’Œæ—¶é—´
-        struct DateTime logDateTime;
-
         while (fgets(line, sizeof(line), file)) 
         {
-            // æ£€æŸ¥æ˜¯å¦åŒ…å«å…³é”®å­—
+            // ¼ì²éÊÇ·ñ°üº¬¹Ø¼ü×Ö
             if (strstr(line, "StartLoadingDestination") != NULL) 
             {
-                // æå–å¹´ã€æœˆã€æ—¥ã€å°æ—¶ã€åˆ†é’Ÿã€ç§’
-                sscanf(line, "[%4[^.].%2[^.].%2[^-]-%2[^.].%2[^.].%2[^:]:%2[^.].%2[^.]:%3[^]]", logDateTime.year, logDateTime.month, logDateTime.day, logDateTime.hour, logDateTime.minute, logDateTime.second, logDateTime.millisecond);
+                unsigned int LogcombinedDateTime = LogcombineDateTime_sec(line,logDateTime);
 
-                // å°†å¹´ã€æœˆã€æ—¥ã€å°æ—¶ã€åˆ†é’Ÿã€ç§’ç»„åˆæˆä¸€ä¸ªæ•´æ•°
-                int LogcombinedDateTime = combineDateTime(logDateTime);    
-
-                // è·å–å½“å‰æ—¶é—´çš„æ—¶é—´æˆ³
-                time_t currentTime;
+                //¸üĞÂµ±Ç°Ê±¼ä
                 time(&currentTime);
-
-                // ä½¿ç”¨ localtime å‡½æ•°å°†æ—¶é—´æˆ³è½¬æ¢ä¸ºæœ¬åœ°æ—¶é—´
-                struct tm *localTime = localtime(&currentTime);
-
-                int LocalcombinedDateTime = (localTime->tm_mon + 1) * 2592000+
-                (localTime->tm_mday) * 86400+
-                (localTime->tm_hour) * 3600+
-                (localTime->tm_min) * 60+
-                (localTime->tm_sec);
+                localTime = localtime(&currentTime);
+                
+                unsigned int LocalcombinedDateTime = LocalcombineDateTime_sec(localTime);
 
                 if( (LocalcombinedDateTime - LogcombinedDateTime) < 15 )
                 {   
-                    printf("Skip_Time\n");
-
-                    // ç­‰å¾…5ç§’
-                    system("timeout /t 5 /nobreak >nul");
-
-                    // è·å–å‘½ä»¤æ•°ç»„çš„é•¿åº¦
-                    size_t numCommands = sizeof(commands) / sizeof(commands[0]);
-
-                    for (size_t i = 0; i < numCommands; ++i) 
-                    {
-                        // æ„å»ºå®Œæ•´çš„å‘½ä»¤å­—ç¬¦ä¸²
-                        char fullCommand[512];
-                        snprintf(fullCommand, sizeof(fullCommand), "%s %s %s %s", rconPath, serverPort, serverPassword, commands[i]);
-
-                        // æ‰§è¡Œå‘½ä»¤
-                        int result = system(fullCommand);
-
-                        // æ£€æŸ¥æ‰§è¡Œç»“æœ
-                        if (result != 0) 
-                        {
-                            fprintf(stderr, "Failed to execute command: %s\n", fullCommand);
-                            return 1;
-                        }
-
-                        // ç­‰å¾…1ç§’
-                        system("timeout /t 1 /nobreak >nul");
-                    }
+                    Skip_Time(localTime);
                 }
                 else
                 {
-                    // ç­‰å¾…1ç§’
+                    //µÈ´ı1Ãë
                     system("timeout /t 1 /nobreak >nul");
                 }
             }
         }
-        line[0] = '\0';
+        fclose(file);
     }
 
-    fclose(file);
     return 0;
 }
-
-
