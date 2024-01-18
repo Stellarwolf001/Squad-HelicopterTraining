@@ -2,7 +2,7 @@
  *识别日志中换图的时间戳，
  *与实际时间做对比，
  *差值小于15s及执行加速及取消限制指令
- *本人刚刚入门，代码风格较为浅显，大佬勿喷
+ *本人刚刚入门，代码风格较为浅显，大佬请见谅
  *
  *请将以下内容进行修改
  * 23行 *rconPath = "C:\\Users\\Administrator\\Desktop\\rcon.exe";
@@ -39,6 +39,12 @@ const char *commands[] =
     "AdminNoRespawnTimer 1",
     "AdminSlomo 1"
 };
+
+//获取当前时间的时间戳
+time_t currentTime;
+
+//完整的命令字符串
+char fullCommand[512];
 
 // 定义结构体存储日期和时间
 struct DateTime 
@@ -81,6 +87,49 @@ unsigned int LocalcombineDateTime_sec(struct tm *localTime)
     return result;
 }
 
+//判断时间
+int IsTimeDifferenceWithinThreshold(unsigned int LogcombinedDateTime)
+{
+    //更新当前时间
+    time(&currentTime);
+    struct tm *localTime = localtime(&currentTime);
+    
+    unsigned int LocalcombinedDateTime = LocalcombineDateTime_sec(localTime);
+
+    if( (LocalcombinedDateTime - LogcombinedDateTime) < 15 )
+        return 1;
+    else
+        return 0;
+}
+
+int executeCommand(const char *command, char *output, size_t outputSize) 
+{
+    FILE *fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("Error opening pipe");
+        return -1;
+    }
+
+    // 读取命令输出
+    size_t bytesRead = fread(output, 1, outputSize - 1, fp);
+    if (bytesRead == 0) {
+        perror("Error reading from pipe");
+        pclose(fp);
+        return -1;
+    }
+
+    output[bytesRead] = '\0';  // 添加字符串结束符
+
+    // 关闭文件指针
+    int status = pclose(fp);
+    if (status == -1) {
+        perror("Error closing pipe");
+        return -1;
+    }
+
+    return 0;
+}
+
 //执行指令
 int Skip_Time(struct tm *localTime)
 {
@@ -96,8 +145,6 @@ int Skip_Time(struct tm *localTime)
 
     for (size_t i = 0; i < numCommands; i++) 
     {
-        //构建完整的命令字符串
-        char fullCommand[512];
         snprintf(fullCommand, sizeof(fullCommand), "%s %s %s %s", rconPath, serverPort, serverPassword, commands[i]);
 
         //执行指令
@@ -121,7 +168,6 @@ int main()
     char line[512];
 
     //获取当前时间的时间戳
-    time_t currentTime;
     time(&currentTime);
 
     //使用 localtime 函数将时间戳转换为本地时间
@@ -144,19 +190,56 @@ int main()
         while (fgets(line, sizeof(line), file)) 
         {
             // 检查是否包含关键字
-            if (strstr(line, "StartLoadingDestination") != NULL) 
+            if(strstr(line, "StartLoadingDestination") != NULL) 
             {
-                unsigned int LogcombinedDateTime = LogcombineDateTime_sec(line,logDateTime);
-
-                //更新当前时间
-                time(&currentTime);
-                localTime = localtime(&currentTime);
-                
-                unsigned int LocalcombinedDateTime = LocalcombineDateTime_sec(localTime);
-
-                if( (LocalcombinedDateTime - LogcombinedDateTime) < 15 )
+                if(IsTimeDifferenceWithinThreshold(LogcombineDateTime_sec(line,logDateTime)))
                 {   
                     Skip_Time(localTime);
+                }
+                else
+                {
+                    //等待1秒
+                    system("timeout /t 1 /nobreak >nul");
+                }
+            }
+            if(strstr(line, "Join succeeded") != NULL)
+            {
+                if(IsTimeDifferenceWithinThreshold(LogcombineDateTime_sec(line,logDateTime)))
+                {
+                    //向服务器发送ShowServerInfo指令获取服务器状态
+                    snprintf(fullCommand, sizeof(fullCommand), "%s %s %s %s", rconPath, serverPort, serverPassword, "ShowServerInfo");
+
+                    char commandOutput[1024]; // 适当大小的缓冲区，用于保存命令输出
+
+                    //执行指令并获取输出
+                    executeCommand(fullCommand, commandOutput, sizeof(commandOutput));
+
+                    //查找"PlayerCount_I"字段
+                    const char *playerCountStart = strstr(commandOutput, "\"PlayerCount_I\":\"");
+                    if (playerCountStart != NULL) 
+                    {
+                        //定位到数字的起始位置
+                        const char *countStart = playerCountStart + strlen("\"PlayerCount_I\":\"");
+                        
+                        //使用sscanf提取数字及服务器内人数
+                        int playerCount;
+                        if (sscanf(countStart, "%d", &playerCount) == 1) 
+                        {
+                            //服务器内仅有一人，执行指令
+                            if(playerCount == 1)
+                            {
+                                Skip_Time(localTime);
+                            }
+                        } 
+                        else 
+                        {
+                            printf("Failed to extract player count.\n");
+                        }
+                    } 
+                    else 
+                    {
+                        printf("PlayerCount_I not found in the string.\n");
+                    }
                 }
                 else
                 {
