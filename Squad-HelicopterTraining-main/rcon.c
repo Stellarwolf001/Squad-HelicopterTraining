@@ -182,8 +182,8 @@ int main(int argc, char **argv)
   struct sockaddr_in a;
   int sock;
   int ret, i;
-  char password[512]="YOUR_PASSWORD_HERE";
-  short port = 21114;
+  char password[512]="YourRCONPassword";
+  short port = 27015;
   char address[512] = "127.0.0.1";
  
   int arg;

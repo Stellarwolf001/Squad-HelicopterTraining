@@ -9,7 +9,7 @@
 #define EVENT_SIZE  (sizeof(struct inotify_event))
 #define BUF_LEN     (1024 * (EVENT_SIZE + 16))
 
-extern char line[512];
+extern char line[1024];
 extern long fileSize;
 
 long getFileSize(const char *filePath);

@@ -1,6 +1,6 @@
 #include "./file.h"
 
-char line[512];
+char line[1024];
 
 long fileSize;
 
@@ -91,19 +91,23 @@ void readUpdatedContent(const char *filePath, long *offset)
             exit(EXIT_FAILURE);
         }
 
-#if     CHECKSTARTGAME
-        CheckStarkGame(line);
-        CheckOverGame(line);
-#endif
-#if     CHECKPLAYERJOIN
-        CheckPlayerJoin(line);
-#endif
-#if     CHECKKILL
-        CheckKill(line);
-#endif
-#if     CHECKPLAYERINTURRET
-        CheckPlayerInAllTurret(line);
-#endif
+        //检测游戏开局及结束
+        #if CHECKSTARTGAME
+            CheckStarkGame(line);
+            CheckOverGame(line);
+        #endif
+        //检测玩家加入
+        #if CHECKPLAYERJOIN
+            CheckPlayerJoin(line);
+        #endif
+        //检测伤害
+        #if (CHECKDAMAGE || CHECKDAMAGEWARNING)
+            CheckDamage(line);
+        #endif
+        //检测玩家进入炮手位
+        #if CHECKPLAYERINTURRET
+            CheckPlayerInAllTurret(line);
+        #endif
         // 清空 line 缓冲区
         memset(line, 0, sizeof(line));
     }

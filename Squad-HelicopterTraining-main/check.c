@@ -1,15 +1,15 @@
 #include "./check.h"
 
 void CheckStarkGame(char *line)
-{            
+{ 
     if(CheckstringAndTime(line,"StartLoadingDestination"))
     {
-        Skip_Time(localTime);
+        Skip_Time(localTime,CHANGELAYER);
     }
 }
 
 void CheckOverGame(char *line)
-{            
+{
     if(CheckstringAndTime(line,"DetermineMatchWinner"))
     {
         RCONCommand("AdminSlomo 20", commandOutput);
@@ -17,7 +17,7 @@ void CheckOverGame(char *line)
 }
 
 void CheckPlayerJoin(char *line)
-{            
+{
     if(CheckstringAndTime(line,"Join succeeded"))
     {   
         char *PlayerName = GetGamePlayerName(line, "LogNet: ", "Join succeeded: %[^ ]");
@@ -27,37 +27,46 @@ void CheckPlayerJoin(char *line)
 
         if(GetGamePlayerNum() == 1)
         {
-            Skip_Time(localTime);
+            Skip_Time(localTime,PLAYERJOIN);
         }
-        
+
         //释放内存
         free(PlayerName);
     }
 }
 
 //检测是否有玩家造成恶意伤害
-void CheckKill(char *line)
+void CheckDamage(char *line)
 {
     if(CheckstringAndTime(line,"Player Controller") && CheckNonHelicopter(line))
     {
         char *KillerPlayerName = GetGamePlayerName(line, "from ", "%[^ ] (Online");
         char *VictimPlayerName = GetGamePlayerName(line, "LogSquad: Player:", "%[^ ] ActualDamage");
             
+        float  ActualDamage;
+        sscanf(line, "%*[^=]=%f", &ActualDamage);
+
         if (KillerPlayerName != NULL && VictimPlayerName != NULL && strcmp(KillerPlayerName, VictimPlayerName) != 0 && strcmp(VictimPlayerName, "nullptr") != 0)
         {
+            char adminCommand[512];
+#if         CHECKDAMAGE
             printf("[%d.%d.%d-%d:%d:%d]",localTime->tm_year + 1900,localTime->tm_mon + 1,localTime->tm_mday,localTime->tm_hour,localTime->tm_min,localTime->tm_sec);
             printf("Was kicked for a kill:Player %s\n", KillerPlayerName);
 
-            char adminCommand[512];
             snprintf(adminCommand, sizeof(adminCommand), "AdminKick %s 直升机训练场请勿对玩家造成伤害", KillerPlayerName);
             RCONCommand(adminCommand, commandOutput);
             snprintf(adminCommand, sizeof(adminCommand), "AdminBroadcast %s 对%s造成伤害,已被自动踢出", KillerPlayerName,VictimPlayerName);
             RCONCommand(adminCommand, commandOutput);
-
-            //释放内存
-            free(KillerPlayerName);
-            free(VictimPlayerName);
+#endif
+#if         CHECKDAMAGEWARNING
+            snprintf(adminCommand, sizeof(adminCommand), "AdminWarn %s 你被%s造成了（%f伤害）", VictimPlayerName,KillerPlayerName,ActualDamage);
+            RCONCommand(adminCommand, commandOutput);
+#endif
         }
+
+        //释放内存
+        free(KillerPlayerName);
+        free(VictimPlayerName);
     }
 }
 
@@ -72,9 +81,9 @@ void CheckPlayerInTurret(char *line, char *vehicleType, char *seatNumber)
         printf("Was kicked for entering the Turret:Player %s\n", PlayerName);
 
         char adminCommand[512];
-        snprintf(adminCommand, sizeof(adminCommand), "AdminKick %s 直升机训练场请勿进入载具炮手位！！！", PlayerName);
+        snprintf(adminCommand, sizeof(adminCommand), "AdminKick %s 直升机训练场请勿进入固定武器或载具炮手位！！！", PlayerName);
         RCONCommand(adminCommand, commandOutput);
-        snprintf(adminCommand, sizeof(adminCommand), "AdminBroadcast %s 已被自动踢出，直升机训练场请勿进入载具炮手位！！！", PlayerName);
+        snprintf(adminCommand, sizeof(adminCommand), "AdminBroadcast %s 已被自动踢出，直升机训练场请勿进入固定武器或载具炮手位！！！", PlayerName);
         RCONCommand(adminCommand, commandOutput);
 
         //释放内存

@@ -5,10 +5,10 @@
  *本人刚刚入门，代码风格较为浅显，大佬请见谅
  *
  *请将config.c文件下内容内容进行修改
- * *rconPath = "YourRconAddress";
+ * *rconPath = "/home/SquadGameServer/Squad-HelicopterTraining/rcon";
  * *serverPassword = "-PYourRCONPassword";
- * *serverPort = "-pYourRCONPort";
- * *log_address = "YourSquadGameAddress";
+ * *serverPort = "-p21114";
+ * *log_address = "/home/SquadGameServer/SquadGame/Saved/Logs/SquadGame.log";
  * 
  * gcc main.c config.c file.c check.c command.c time.c -o main -std=gnu99
  * Squad红警_Stellarwolf编写

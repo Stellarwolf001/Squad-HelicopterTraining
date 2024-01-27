@@ -77,7 +77,7 @@ int CheckstringAndTime(char *line, char *string)
     if (strstr(line, string) != NULL) 
     {
         // 在这里执行其他操作
-        if (IsTimeDifferenceWithinThreshold(LogcombineDateTime_sec(line, logDateTime)))
+        if(IsTimeDifferenceWithinThreshold(LogcombineDateTime_sec(line, logDateTime)))
         {
             return 1;
         }
@@ -122,19 +122,19 @@ int GetGamePlayerNum()
 }
 
 //获取玩家昵称
-char* GetGamePlayerName(const char *line, const char *frontString, const char *searchString) 
+char* GetGamePlayerName(const char *line, const char *frontString, const char *searchString)
 {
     const char *playerInTurret = strstr(line, frontString);
 
-    if (playerInTurret != NULL) {
+    if (playerInTurret != NULL)
+    {
         const char *countStart = playerInTurret + strlen(frontString);
         char playerName[256];
 
-        if (sscanf(countStart, searchString, playerName) == 1) {
-            // 动态分配内存
+        if (sscanf(countStart, searchString, playerName) == 1)
+        {
             char *result = strdup(playerName);
 
-            // 返回新分配的内存
             return result;
         }
     }
@@ -143,11 +143,17 @@ char* GetGamePlayerName(const char *line, const char *frontString, const char *s
 }
 
 //执行指令跳过开局时间
-void Skip_Time(struct tm *localTime)
+void Skip_Time(struct tm *localTime,int command)
 {
     // 打印执行指令的时间
     printf("[%d.%d.%d-%d:%d:%d]", localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
-    printf("ChangeLayer\n");
+    switch(command)
+    {
+        case CHANGELAYER:
+            printf("ChangeLayer\n");break;
+        case PLAYERJOIN:
+            printf("SkipTime\n");break;
+    }
 
     //延时5秒（以微秒为单位）
     usleep(5000000);

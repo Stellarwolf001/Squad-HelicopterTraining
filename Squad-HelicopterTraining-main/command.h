@@ -4,6 +4,9 @@
 #include "./config.h"
 #include "./time.h"
 
+#define CHANGELAYER     1
+#define PLAYERJOIN      2
+
 #define FULLCOMMAND_SIZE    512
 #define COMMANDOUTPUT_SIZE  1024
 
@@ -24,6 +27,6 @@ int CheckstringAndTime(char *line, char *string);
 int GetGamePlayerNum();
 char* GetGamePlayerName(const char *line, const char *frontString, const char *searchString);
 void CheckPlayerInTurret(char *line, char *vehicleType, char *seatNumber);
-void Skip_Time(struct tm *localTime);
+void Skip_Time(struct tm *localTime,int command);
 
 #endif
